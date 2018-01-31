@@ -12,16 +12,25 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import net.sf.json.JSONObject;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -34,6 +43,7 @@ import com.imooc.menu.Menu;
 import com.imooc.menu.ViewButton;
 import com.imooc.po.AccessToken;
 import com.imooc.po.PageAccessToken;
+import com.imooc.po.UserInfo;
 import com.imooc.trans.Data;
 import com.imooc.trans.Parts;
 import com.imooc.trans.Symbols;
@@ -59,6 +69,12 @@ public class WeixinUtil {
 	private static final String DELETE_MENU_URL = "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=ACCESS_TOKEN";
 	
 	private static final String PAGE_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=APPSECRET&code=CODE&grant_type=authorization_code";
+	
+	private static final String isValied = "https://api.weixin.qq.com/sns/auth?access_token=ACCESS_TOKEN&openid=OPENID";
+	
+	private static final String USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
+	
+	public static final String JSAPI_TICKET = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=ACCESS_TOKEN&type=jsapi";
 	/**
 	 * get请求
 	 * @param url
@@ -220,19 +236,28 @@ public class WeixinUtil {
 	 * @throws ParseException
 	 * @throws IOException
 	 */
-	public static PageAccessToken getPAGE_ACCESS_TOKEN_URL(String code) throws ParseException, IOException{
-		PageAccessToken token = new PageAccessToken();
+	public static UserInfo getPAGE_ACCESS_TOKEN_URL(String code) throws ParseException, IOException{
+		UserInfo userInfo = new UserInfo();
 		String url = PAGE_ACCESS_TOKEN_URL.replace("APPID", APPID).replace("APPSECRET", APPSECRET).replace("CODE", code);
 		JSONObject jsonObject = doGetStr(url);
-		System.out.println(jsonObject);
 		if(jsonObject!=null){
-			token.setToken(jsonObject.getString("access_token"));
-			token.setExpiresIn(jsonObject.getInt("expires_in"));
-			token.setOpenid(jsonObject.getString("openid"));
-			token.setRefresh_token(jsonObject.getString("refresh_token"));
-			token.setScope(jsonObject.getString("scope"));
+			String _url = isValied.replace("ACCESS_TOKEN", jsonObject.getString("access_token")).replace("OPENID", jsonObject.getString("openid"));
+			JSONObject result = doGetStr(_url);
+			System.out.println(result.getString("errmsg"));
+			if(result.getString("errmsg").equals("ok")){
+				String userUrl = USERINFO.replace("ACCESS_TOKEN", jsonObject.getString("access_token")).replace("OPENID", jsonObject.getString("openid"));
+				JSONObject user = doGetStr(userUrl);
+				userInfo.setCity(user.getString("city"));
+				userInfo.setCountry(user.getString("country"));
+				userInfo.setHeadimgurl(user.getString("headimgurl"));
+				userInfo.setNickname(user.getString("nickname"));
+				userInfo.setOpenid(user.getString("openid"));
+				userInfo.setProvince(user.getString("province"));
+				userInfo.setAccessToken(jsonObject.getString("access_token"));
+				userInfo.setSex(user.getString("sex"));
+			}
 		}
-		return token;
+		return userInfo;
 	}
 	
 	
@@ -250,7 +275,7 @@ public class WeixinUtil {
 		ViewButton button21 = new ViewButton();
 		button21.setName("view菜单");
 		button21.setType("view");
-		button21.setUrl("http://www.imooc.com");
+		button21.setUrl("https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxe64a74307bc7a375&redirect_uri=https://aty1990.natapp4.cc/weixin/api&response_type=code&scope=snsapi_userinfo&state=123#wechat_redirect");
 		
 		ClickButton button31 = new ClickButton();
 		button31.setName("扫码事件");
@@ -339,4 +364,22 @@ public class WeixinUtil {
 		}
 		return dst.toString();
 	}
+	
+	/**
+     * 
+     * 获取jsapi_ticket
+     * 
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     */
+    public static String getJsapiTicket(String accessToken) throws ParseException, IOException {
+        String url = JSAPI_TICKET.replace("ACCESS_TOKEN", WeixinUtil.getAccessToken().getToken());
+        JSONObject jsonObject = doGetStr(url);
+        String jsapi_ticket = null;
+        if (jsonObject != null) {
+            jsapi_ticket = jsonObject.getString("ticket");
+        }
+        return jsapi_ticket;
+    }
 }

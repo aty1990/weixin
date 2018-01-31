@@ -11,6 +11,11 @@
     <servlet-name>ApiServlet</servlet-name>
     <servlet-class>com.imooc.servlet.ApiServlet</servlet-class>
   </servlet>
+  
+  <servlet>
+    <servlet-name>JsApiServlet</servlet-name>
+    <servlet-class>com.imooc.servlet.JsApiServlet</servlet-class>
+  </servlet>
 
   <servlet-mapping>
     <servlet-name>weixinServlet</servlet-name>
@@ -22,6 +27,10 @@
     <url-pattern>/api</url-pattern>
   </servlet-mapping>
   
+  <servlet-mapping>
+    <servlet-name>JsApiServlet</servlet-name>
+    <url-pattern>/jsapi</url-pattern>
+  </servlet-mapping>
 
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>

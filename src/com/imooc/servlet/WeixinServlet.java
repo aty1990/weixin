@@ -35,6 +35,10 @@ public class WeixinServlet extends HttpServlet {
 		PrintWriter out = resp.getWriter();
 		if(CheckUtil.checkSignature(signature, timestamp, nonce)){
 			out.print(echostr);
+			req.getSession().setAttribute("signature", signature);
+			req.getSession().setAttribute("timestamp", timestamp);
+			req.getSession().setAttribute("nonce", nonce);
+			req.getSession().setAttribute("echostr", echostr);
 		}
 	}
 	

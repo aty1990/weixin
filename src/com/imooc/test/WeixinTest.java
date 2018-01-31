@@ -18,13 +18,14 @@ public class WeixinTest {
 			
 			//String result = WeixinUtil.translate("my name is laobi");
 			//String result = WeixinUtil.translateFull("");
-			//System.out.println(result);
+			System.out.println(token.getToken());
 			
-			String menu = JSONObject.fromObject(WeixinUtil.initMenu()).toString();
+			/*String menu = JSONObject.fromObject(WeixinUtil.initMenu()).toString();
+			System.out.println(menu);
 			int result = WeixinUtil.createMenu(token.getToken(), menu);
 			if(result==0){
 				System.out.println("ok");
-			}
+			}*/
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
