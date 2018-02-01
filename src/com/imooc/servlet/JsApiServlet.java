@@ -26,6 +26,7 @@ public class JsApiServlet extends HttpServlet {
 	}
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String url = request.getParameter("url");
+		System.out.println(request.getSession().getAttribute("accessToken").toString());
 		try {
 			JSONObject json = JSONObject.fromObject(share(url,request.getSession().getAttribute("accessToken").toString())); 
 			response.getWriter().print(json);

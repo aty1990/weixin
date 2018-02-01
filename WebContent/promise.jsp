@@ -1,12 +1,17 @@
-<!DOCTYPE html>
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE>
 <html>
   <head>
-    <title>借款承诺</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">	    
-    <meta name="keywords" content="keyword1,keyword2,keyword3">
-    <meta name="description" content="this is my page">
-    <meta name="content-type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" type="text/css" href="resource/css/index.css" />
+    <base href="<%=basePath%>">
+    
+    <title>My JSP 'promise.jsp' starting page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">	    
+	<link rel="stylesheet" type="text/css" href="https://aty1990.natapp4.cc/weixin/resource/css/index.css" />
 	<style>
 		html,body{
 			height: 100%;
@@ -54,12 +59,13 @@
 		}
 	</style>
   </head>
+  
   <body>
     <div class="promise-page">
 		<header style="background: #fff;">
 			<div style="float: left;">
 				<a href="javascript:history.go(-1)">
-					<img src="image/ico_back@2x.png" />
+					<img src="images/ico_back@2x.png" />
 				</a>
 			</div>
 			<p>借款承诺</p>
@@ -67,7 +73,7 @@
 
 		<div class="content">
 			<div class="container">
-				<img src="image/promise.png" width="100%">
+				<img src="images/promise.png" width="100%">
 				<div class="promise-text">
 					<i v-for="word in textList">{{word}}</i>
 				</div>
@@ -80,7 +86,7 @@
 				<input  type="button" @click="stopRead" value="朗读结束"/>
 			</div>
 			<div class="sumbit" v-show="submit">
-				<input  type="button" @click="reStart" value="重新朗读" style="width: 100%;background: url('image/btn_normal@2x.png') no-repeat;background-size: 100% 100%;" />
+				<input  type="button" @click="reStart" value="重新朗读" style="width: 100%;background: url('images/button_normal@2x1.png') no-repeat;background-size: 100% 100%;" />
 			</div>
 			<div class="sumbit" v-show="submit">
 				<input  type="button" @click="commit" value="确认提交" style="width: 100%;" />
@@ -88,10 +94,10 @@
 			<div id="jpId"></div> 
 		</div>
 	</div>
-		
-	<script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
-	<script src="resource/js/vue.js"></script>
-	<script src="resource/js/utils.js"></script>
+	<script src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+	<script src="https://aty1990.natapp4.cc/weixin/resource/js/jquery-2.1.3.min.js"></script>
+	<script src="https://aty1990.natapp4.cc/weixin/resource/js/vue.js"></script>
+	<script src="https://aty1990.natapp4.cc/weixin/resource/js/utils.js"></script>
 	<script>
 	    new Vue({
 		  	el: '.promise-page',
@@ -102,14 +108,15 @@
 		    	disabled : false,
 		    	submit : false,
 		    	text : "开始朗读",
-		    	textList : [],
+		    	textList : ["我","保","证","借","所","借","的","我","保","证","借","所","借","的","我","保","证","借","所","借","的"],
 		    	localId : "",					// 音频id
 		    	timer : "",						// 定时器
 		    	status : 1                      //1开始朗读  2正在朗读  3朗读结束
 		  	},
 		  	mounted(){
-			   this.initWxConfig();
-			   this.getVoice();
+			   //this.initWxConfig();
+			   //this.getVoice();
+			   this.initSign();
 		  	},
 		  	methods:{
 		  		start(){
@@ -127,6 +134,30 @@
 			  				_this.status = 2;
 			  			},6000)
 		  			}
+		  		},
+		  		initSign(){
+		  			$.ajax({ 
+				        type: "post", 
+				       	url: "https://aty1990.natapp4.cc/weixin/jsapi",
+				       	data:{
+				       		url:location.href.split('#')[0]
+				       	}, 
+				       	cache:false, 
+				       	async:false, 
+				       	dataType:"json",
+				        success: function(data){ 
+				        	console.log(data);
+				        	console.log(data.timestamp);
+							wx.config({
+							    debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+							    appId: data.appid, // 必填，公众号的唯一标识
+							    timestamp: data.timestamp, // 必填，生成签名的时间戳
+							    nonceStr: data.nonceStr, // 必填，生成签名的随机串
+							    signature: data.signature,// 必填，签名，见附录1
+							    jsApiList: ['startRecord', 'stopRecord','playVoice','onVoicePlayEnd','uploadVoice','downloadVoice','translateVoice','stopVoice'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+							});
+				        } 
+					});
 		  		},
 		  		stopRead(){
 		  			var _this = this;
@@ -146,7 +177,7 @@
 						success: function (res) {
 							_this.localId = res.localId;
 							// 录制完成后自动播放录制的音频
-							_this.playVoice();
+							_this.playVoices();
 							// 识别录音
 							_this.translate(res.localId);
 						}
@@ -161,6 +192,7 @@
 						success: function (res) {
 							// 语音识别的结果
 							_self.translateResult = res.translateResult;
+							alert(res.translateResult);
 						}
 					});
 			  	},
@@ -196,7 +228,7 @@
 		  				wx.stopVoice({
 							localId: _self.localId 
 						});
-		  				utils.fetchData({
+		  				/* utils.fetchData({
 		  					url  : constans.serviceUrl + '/upload/audio',
 							type : "post",
 							data : {
@@ -212,7 +244,7 @@
 									//window.location = constans.htmlUrl + "/index.html";
 								}
 							}
-		  				})
+		  				}) */
 		  			}
 		  		},
 		  		initWxConfig(){
@@ -224,7 +256,7 @@
 								timestamp: data.body.timestamp,
 								nonceStr: data.body.noncestr,
 								signature: data.body.signature,
-								jsApiList: ['startRecord', 'stopRecord','onVoicePlayEnd','uploadVoice','downloadVoice']
+								jsApiList: ['startRecord', 'stopRecord','onVoicePlayEnd','uploadVoice','downloadVoice','playVoice']
 							});
 						
 		  				},
@@ -234,10 +266,10 @@
 		  			})
 		  		},
 		  		// 播放当前录制的音频
-		  		playVoice(){
+		  		playVoices(){
 		  			var _this = this;
 		  			wx.playVoice({
-						localId: _this.localId 
+						localId: _this.localId
 					});
 		  		},
 		  		getVoice(){

@@ -26,6 +26,6 @@ public class ApiServlet extends HttpServlet {
 		UserInfo user = WeixinUtil.getPAGE_ACCESS_TOKEN_URL(code);
 		request.getSession().setAttribute("accessToken", user.getAccessToken());
 		request.setAttribute("user", JSONObject.fromObject(user)); 
-		request.getRequestDispatcher("index.jsp").forward(request, response);
+		request.getRequestDispatcher("promise.jsp").forward(request, response);
 	}
 }

@@ -25,6 +25,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
   	
   	<button onclick="getjsticket()">jsticket</button>
   	
+  	<button onclick="html1()">index1.html</button>
+  	
   	<button onclick="getImg()">调用相册</button>
   	
   	<img src="" id="myimg" width="100%"/>
@@ -67,6 +69,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					$("#myimg").attr("src",localIds);
 				}
 			});
+   		}
+   		
+   		function html1(){
+   			
+   			location.href="promise.jsp";
    		}
    	</script>
   </body>
